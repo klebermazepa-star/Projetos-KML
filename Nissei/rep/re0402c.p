@@ -18,7 +18,7 @@
 **
 **       Programa: RE0402C
 **
-**       Objetivo: Desatualizacao de Notas Fiscais - Recebimento F¡sico
+**       Objetivo: Desatualizacao de Notas Fiscais - Recebimento Fï¿½sico
 **
 *****************************************************************************/
 
@@ -37,4 +37,8 @@ find doc-fisico
     
 if  avail doc-fisico then     
     assign doc-fisico.situacao = 3.
+
+
+    alterado para o projeto 2
+    
 
