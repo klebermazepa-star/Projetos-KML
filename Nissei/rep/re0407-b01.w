@@ -4,6 +4,8 @@
 */
 &Scoped-define WINDOW-NAME CURRENT-WINDOW
 
+//teste projeto 4
+
 
 /* Temp-Table and Buffer definitions                                    */
 DEFINE TEMP-TABLE tt-rat-saldo-terc NO-UNDO LIKE rat-saldo-terc
@@ -584,7 +586,7 @@ DO:
         IF CAN-FIND(FIRST tt-rat-saldo-terc
                     WHERE tt-rat-saldo-terc.it-codigo = vit-codigo
                       AND tt-rat-saldo-terc.lote      = INPUT FRAME {&FRAME-NAME} c-lote) THEN DO:
-            {utp/ut-liter.i "Lote/S‚rie" *}
+            {utp/ut-liter.i "Lote/Sï¿½rie" *}
             RUN utp/ut-msgs.p(INPUT "show":U, 
                               INPUT 7, 
                               INPUT RETURN-VALUE).
