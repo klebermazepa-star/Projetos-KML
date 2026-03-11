@@ -74,7 +74,7 @@ run app/apapi020.p ( input  raw-param,
                      output table tt-titulo,
                      output table tt-retorno-erro ).
                      
-/* O programa re0402d.p recebe como retorno a tabela tt-tit-ap ao inv‚s de tt-titulo */                     
+/* O programa re0402d.p recebe como retorno a tabela tt-tit-ap ao invï¿½s de tt-titulo */                     
 for each tt-titulo no-lock:
     create tt-tit-ap.
     assign tt-tit-ap.ep-codigo   = tt-titulo.ep-codigo
@@ -128,4 +128,11 @@ procedure pi-cria-tt-param:
            tt-param.forn-fim              = ?
            tt-param.ref-fim               = ?.
 end.
+
+
+/*
+
+desenvolvimento do projeto PN 
+
+*/
 
