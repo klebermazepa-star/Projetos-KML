@@ -21,10 +21,18 @@
 **
 **       Objetivo: Criar o Arquivo de Erros do Documento
 **
-**       VersÆo..: 1.00.000 - Sandra Stadelhofer
+**       Versï¿½o..: 1.00.000 - Sandra Stadelhofer
 **
 ****************************************************************************/
 
+
+ /*
+
+   teste de codigo do projeto 5
+
+   */
+   
+   
 def input param de-calculado       as decimal no-undo.
 def input param de-informado       as decimal no-undo.
 def input param i-tipo             as integer no-undo.
