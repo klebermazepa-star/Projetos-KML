@@ -1,0 +1,145 @@
+/*****************************************************************************
+** re0402a.m10 - desatualiza NFD
+** Criado para flexibilizar a manuten‡Æo no mesmo
+******************************************************************************/
+
+procedure pi-desatualiza-ft:
+
+def var l-pd0001        as logical  no-undo.
+
+do on error undo, return "ADM-ERROR" :
+
+    if item-doc-est.nro-comp <> "" then
+    do:
+        find it-nota-fisc use-index ch-nota-item
+            where it-nota-fisc.cod-estabel = docum-est.cod-estabel
+            and   it-nota-fisc.serie       = item-doc-est.serie-comp
+            and   it-nota-fisc.nr-nota-fis = item-doc-est.nro-comp
+            and   it-nota-fisc.nr-seq-fat  = item-doc-est.seq-comp
+            and   it-nota-fisc.it-codigo   = item-doc-est.it-codigo
+                no-lock no-error.
+
+        find first ped-item
+            where ped-item.nome-abrev   = emitente.nome-abrev
+            and   ped-item.nr-pedcli    = it-nota-fisc.nr-pedcli
+            and   ped-item.nr-sequencia = it-nota-fisc.nr-seq-ped
+            and   ped-item.it-codigo    = it-nota-fisc.it-codigo
+            and   ped-item.cod-refer    = item-doc-est.cod-refer no-lock no-error.
+    end.
+    else 
+        find first ped-item
+            where ped-item.nome-abrev   = emitente.nome-abrev
+            and   ped-item.nr-pedcli    = item-doc-est.nr-pedcli
+            and   ped-item.nr-sequencia = item-doc-est.nr-pd-seq
+            and   ped-item.it-codigo    = item-doc-est.it-codigo
+            and   ped-item.cod-refer    = item-doc-est.cod-refer no-lock no-error.
+
+    /* Baixa do Modulo de Pedidos */
+    if  param-global.modulo-pd 
+    and avail ped-item
+    and ped-item.esp-ped = 1 then do:
+
+        for each rat-lote {cdp/cd8900.i "rat-lote" "item-doc-est"}
+            and rat-lote.sequencia = item-doc-est.sequencia no-lock
+            break by rat-lote.sequencia:
+
+            find tt-ped-item where tt-ped-item.rw-ped-item = rowid(ped-item) no-lock no-error.
+            if  not avail tt-ped-item then do:
+                create tt-ped-item.
+                assign tt-ped-item.rw-ped-item = rowid(ped-item).
+            end.
+
+            if  can-find (first b-item-ref 
+                       where b-item-ref.it-codigo    = rat-lote.it-codigo 
+                       and   b-item-ref.tipo-con-est = 4) then do:
+
+                 for first b-ped-item 
+                     fields (b-ped-item.cod-refer
+                             b-ped-item.nome-abrev
+                             b-ped-item.nr-pedcli
+                             b-ped-item.nr-sequencia
+                             b-ped-item.it-codigo)
+                     where b-ped-item.nome-abrev   = emitente.nome-abrev 
+                       and b-ped-item.nr-pedcli    = item-doc-est.nr-pedcli 
+                       and b-ped-item.nr-sequencia = item-doc-est.seq-comp
+                       and b-ped-item.it-codigo    = rat-lote.it-codigo no-lock:
+
+                        assign c-referencia = b-ped-item.cod-refer.
+                 end.
+            end.    
+            else assign c-referencia = "".
+
+            run pdp/pd9701.p (input rowid(ped-item),
+                              input rat-lote.it-codigo,
+                              input c-referencia,
+                              input rat-lote.quantidade,
+                              input yes,
+                              input no,
+                              input item-doc-est.reabre-pd,
+                              input no,
+                              ( if  avail it-nota-fisc then it-nota-fisc.nr-entrega
+                                else 0 ),
+                              input table tt-ped-item,
+                              input 1).
+
+            if  last-of(rat-lote.sequencia) then do:
+                find tt-ped-item where tt-ped-item.rw-ped-item = rowid(ped-item) no-lock no-error.
+                if  not avail tt-ped-item then do:
+                    create tt-ped-item.
+                    assign tt-ped-item.rw-ped-item = rowid(ped-item).
+                end.
+                run pdp/pd9701.p (input rowid(ped-item),
+                                  input item-doc-est.it-codigo,
+                                  input item-doc-est.cod-refer,
+                                  ( if (   item.politica = 5 
+                                        or item.politica = 6) 
+                                    and not item-doc-est.baixa-ce then
+                                        item-doc-est.quantidade 
+                                    else 0 ),
+                                  input yes,
+                                  input yes,
+                                  input item-doc-est.reabre-pd,
+                                  input no,
+                                  ( if  avail it-nota-fisc then it-nota-fisc.nr-entrega
+                                    else 0 ),
+                                  input table tt-ped-item,
+                                  input 1).
+            end.
+            assign l-pd0001 = yes.
+        end.
+        if  l-pd0001 = no then do:
+            find tt-ped-item where tt-ped-item.rw-ped-item = rowid(ped-item) no-lock no-error.
+            if  not avail tt-ped-item then do:
+                create tt-ped-item.
+                assign tt-ped-item.rw-ped-item = rowid(ped-item).
+            end.
+            run pdp/pd9701.p (input rowid(ped-item),
+                              input item-doc-est.it-codigo,
+                              input item-doc-est.cod-refer,
+                              input item-doc-est.quantidade,
+                              input yes,
+                              input yes,
+                              input item-doc-est.reabre-pd,
+                              input no,
+                              ( if  avail it-nota-fisc then it-nota-fisc.nr-entrega
+                                else 0 ),
+                              input table tt-ped-item,
+                              input 1).
+        end.
+    end.       
+
+    &IF "{&bf_dis_versao_ems}" >= "2.04" &THEN
+        IF  AVAIL it-nota-fisc     AND 
+            param-global.modulo-ex AND 
+            CONNECTED("MGCEX") THEN DO:
+            RUN exp/ex3051.p PERSISTENT SET h-ex3051.
+            RUN ModificaSituacao IN h-ex3051 (INPUT 2,
+                                              INPUT ROWID(it-nota-fisc)).
+            DELETE PROCEDURE h-ex3051.
+            ASSIGN h-ex3051 = ?.
+        END.
+    &ENDIF
+     
+end.
+
+end procedure.

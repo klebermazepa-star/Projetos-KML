@@ -1,0 +1,48 @@
+
+procedure pi-desatualiza-memorando:
+    &if '{&bf_cex_versao_ems}' >= '2.062' &then
+         IF  param-global.modulo-ex          AND 
+             emitente.pais = estabelec.pais  and
+             &IF "{&bf_dis_versao_ems}" >= "2.062" &THEN
+             docum-est.log-memorando
+             &ELSE
+             SUBSTR(docum-est.char-1,91,1) = "1"
+             &ENDIF THEN DO:
+             RUN exp/exapi009.p PERSISTENT SET h-exapi.
+             RUN inicializaBOs IN h-exapi.
+             RUN deleteMemoSaldo IN h-exapi (input  rowid(item-doc-est),
+                                             OUTPUT table RowErrors).
+             RUN finalizaBOs IN h-exapi.
+             DELETE PROCEDURE h-exapi.
+             ASSIGN h-exapi = ?.
+        
+             find last tt-erro no-error.
+             if  avail tt-erro then
+                 assign i-sequencia = tt-erro.i-sequen + 1.
+             else 
+                 assign i-sequencia = 1.
+
+             IF CAN-FIND(FIRST RowErrors
+                         WHERE RowErrors.ErrorSubType = "ERROR") THEN
+                ASSIGN l-erro = YES.
+        
+             FOR EACH RowErrors:
+                 find first tt-erro where tt-erro.cd-erro = RowErrors.ErrorNumber no-error.
+                 if  not avail tt-erro then do:
+                     CREATE tt-erro.
+                     assign tt-erro.i-sequen = i-sequencia
+                            tt-erro.cd-erro  = RowErrors.ErrorNumber
+                            tt-erro.mensagem = RowErrors.ErrorDescription
+                            i-sequencia      = i-sequencia + 1.
+                     run rep/re9995.p ( input rowid(docum-est),
+                                        0, 
+                                        0,
+                                        RowErrors.ErrorNumber, 
+                                        no,
+                                        0,
+                                        2 ). /* Advertˆncia */
+                end.
+             END.                       
+         END.
+    &endif    
+end procedure.        

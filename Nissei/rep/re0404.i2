@@ -1,0 +1,141 @@
+/****************************************************************************
+**
+**  Include.: re0404.i2
+**
+**  Objetivo: ImpressÆo do log de exporta‡Æo e Exporta‡Æo (tt-lin-i-ap)
+**
+****************************************************************************/
+put stream arq-export 
+    "200"                                    
+    tt-lin-i-ap.ep-codigo                &IF "{&mguni_version}" >= "2.071" &THEN
+                                           format "x(5)"
+                                         &ELSE
+                                           format "999"  
+                                         &ENDIF           space (0)
+    tt-lin-i-ap.referencia                 format "x(10)" space(0) 
+    tt-lin-i-ap.sequencia                  format "999999" space(0)
+    tt-lin-i-ap.serie                      format "x(5)"  space(0)   
+    tt-lin-i-ap.nr-docto                   format "x(16)" space(0)
+    tt-lin-i-ap.parcela                    format "x(2)" space(0) 
+    "      "                               format "x(6)" space(0) 
+    day(tt-lin-i-ap.dt-emissao)            format "99"  space(0)
+    month(tt-lin-i-ap.dt-emissao)          format "99"  space(0)
+    year(tt-lin-i-ap.dt-emissao)           format "9999" space(0) 
+    day(tt-lin-i-ap.dt-vencimen)           format "99"  space(0)
+    month(tt-lin-i-ap.dt-vencimen)         format "99" space(0)
+    year(tt-lin-i-ap.dt-vencimen)          format "9999" space(0)
+    (tt-lin-i-ap.vl-original * 100)        format "999999999999" space(0)
+    day(tt-lin-i-ap.dt-desconto)           format "99"  space(0)
+    month(tt-lin-i-ap.dt-desconto)         format "99" space(0)
+    year(tt-lin-i-ap.dt-desconto)          format "9999" space(0)
+    (tt-lin-i-ap.vl-desconto * 100)        format "999999999999" space(0)
+    tt-lin-i-ap.estado                     format "9" space(0)
+    tt-lin-i-ap.ct-debito                  format "x(20)" space(0)
+    tt-lin-i-ap.sc-debito                  format "x(20)" space(0) 
+    tt-lin-i-ap.origem                     format "99" space(0) 
+    tt-lin-i-ap.cod-estabel              &IF "{&mguni_version}" >= "2.071" &THEN
+                                           format "x(5)"
+                                         &ELSE
+                                           format "x(3)"  
+                                         &ENDIF           space (0) 
+    tt-lin-i-ap.cod-portador               format "99999" space(0) 
+    tt-lin-i-ap.cod-esp                    format "x(2)" space(0) 
+    tt-lin-i-ap.perc-multa                 format "9999" space(0) 
+    (tt-lin-i-ap.vl-juros * 100)           format "999999999999" space(0)
+    tt-lin-i-ap.seq-import                 format "999999" space(0)      
+    day(tt-lin-i-ap.dt-transacao)          format "99" space(0)
+    month(tt-lin-i-ap.dt-transacao)        format "99" space(0)
+    year(tt-lin-i-ap.dt-transacao)         format "9999" space(0)
+    (tt-lin-i-ap.vl-imposto * 100)         format "999999999999" space(0)
+    (tt-lin-i-ap.perc-juros * 100000)      format "99999999" space(0) 
+    tt-lin-i-ap.dias-atraso                format "999" space(0) 
+    (tt-lin-i-ap.perc-mora * 100000)       format "999999999" space(0) 
+    tt-lin-i-ap.observacao                 format "x(80)" space(0)
+    tt-lin-i-ap.cod-barras                 format "x(40)" space(0) 
+    (tt-lin-i-ap.valor-ir * 100)           format "999999999999" space(0) 
+    tt-lin-i-ap.tp-codigo                  format "999" space(0) 
+    tt-lin-i-ap.historico                  format "x(80)" space(0) 
+    tt-lin-i-ap.hp-codigo                  format "999" space(0) 
+    tt-lin-i-ap.mo-vl-titulo               format "99" space(0) 
+    tt-lin-i-ap.cod-retencao               format "99999" space(0)    
+    tt-lin-i-ap.nr-invoice                 format "9999999" space(0)    
+    (tt-lin-i-ap.valor-fasb * 100)         format "99999999999"   space(0) 
+    (tt-lin-i-ap.valor-pres * 100)         format "99999999999"  space(0) 
+    (tt-lin-i-ap.valor-cmi  * 100)         format "99999999999"  space(0) 
+    tt-lin-i-ap.cod-controle               format "x(15)"  space(0) 
+    tt-lin-i-ap.tem-hist                   format "S/N" space(0)  
+    (tt-lin-i-ap.vl-ir-antec * 100)        format "999999999999"  space(0) 
+    tt-lin-i-ap.num-ord-inv                format "999999"  space(0) 
+    tt-lin-i-ap.tp-pagto                   format "99"  space(0) 
+    tt-lin-i-ap.cod-cond-pag               format "999" space(0) 
+    (tt-lin-i-ap.cotacao-dia  * 100000000) format "9999999999999"  space(0)       
+    (tt-lin-i-ap.diversos * 100)           format "99999999999" space(0) 
+    day(tt-lin-i-ap.dt-prev-pag)           format "99" space(0)
+    month(tt-lin-i-ap.dt-prev-pag)         format "99" space(0)
+    year(tt-lin-i-ap.dt-prev-pag)          format "9999" space(0)    
+    (tt-lin-i-ap.vl-orig-me * 100)         format "99999999999999" space(0) 
+    tt-lin-i-ap.mo-codigo                  format "99" space(0)  
+    (tt-lin-i-ap.frete * 100)              format "99999999999999"  space(0) 
+    tt-lin-i-ap.docum-est                  format "99999999" space(0) 
+    tt-lin-i-ap.nat-operac                 format "x(6)" space(0) 
+    tt-lin-i-ap.tem-credito                format "S/N" space(0) 
+    "1"                                     
+    (tt-lin-i-ap.vl-liquido * 100)         format "99999999999"  space(0) 
+    (tt-lin-i-ap.vl-desconto-me * 100)     format "999999999999" space(0)       
+    (tt-lin-i-ap.diversos-me * 100)        format "99999999999999" space(0) 
+    (tt-lin-i-ap.frete-me * 100)           format "99999999999999" space(0) 
+    (tt-lin-i-ap.vl-imposto-me * 100)      format "99999999999999" space(0) 
+    (tt-lin-i-ap.vl-liquido-me * 100)      format "9999999999999" space(0) 
+    (tt-lin-i-ap.vl-juros-me * 100)        format "999999999999" space(0) 
+     tt-lin-i-ap.sit-receb                 format "99" space(0)     
+    (tt-lin-i-ap.valor-ir-me * 100)        format "999999999999" space(0) 
+     tt-lin-i-ap.cod-fornec                format "999999999" space(0) 
+     tt-lin-i-ap.modalidade                format "9" space(0) skip.
+
+    /*****************************************************************************/    
+    /** Chamada EPC para exportar informa‡äes adicionais da localiza‡Æo         **/
+    /*****************************************************************************/
+    
+    for each tt-epc where tt-epc.cod-event = "Exporta-lin-i-ap":
+       delete tt-epc.
+    end.
+    
+    create tt-epc.
+    assign tt-epc.cod-event     = "Exporta-lin-i-ap"
+           tt-epc.cod-parameter = "ep-codigo"
+           tt-epc.val-parameter = string(tt-lin-i-ap.ep-codigo).
+    create tt-epc.
+    assign tt-epc.cod-event     = "Exporta-lin-i-ap"
+           tt-epc.cod-parameter = "cod-estabel"
+           tt-epc.val-parameter = tt-lin-i-ap.cod-estabel.
+    create tt-epc.
+    assign tt-epc.cod-event     = "Exporta-lin-i-ap"
+           tt-epc.cod-parameter = "serie"
+           tt-epc.val-parameter = tt-lin-i-ap.serie.
+    create tt-epc.
+    assign tt-epc.cod-event     = "Exporta-lin-i-ap"
+           tt-epc.cod-parameter = "nr-docto"
+           tt-epc.val-parameter = tt-lin-i-ap.nr-docto.
+    create tt-epc.
+    assign tt-epc.cod-event     = "Exporta-lin-i-ap"
+           tt-epc.cod-parameter = "cod-fornec"
+           tt-epc.val-parameter = string(tt-lin-i-ap.cod-fornec).
+    create tt-epc.
+    assign tt-epc.cod-event     = "Exporta-lin-i-ap"
+           tt-epc.cod-parameter = "nat-operac"
+           tt-epc.val-parameter = tt-lin-i-ap.nat-operac.
+    create tt-epc.
+    assign tt-epc.cod-event     = "Exporta-lin-i-ap"
+           tt-epc.cod-parameter = "parcela"
+           tt-epc.val-parameter = tt-lin-i-ap.parcela.
+    create tt-epc.
+    assign tt-epc.cod-event     = "Exporta-lin-i-ap"
+           tt-epc.cod-parameter = "cod-esp"
+           tt-epc.val-parameter = tt-lin-i-ap.cod-esp.
+           
+    {include/i-epc201.i "Exporta-lin-i-ap"}
+    
+    /*****************************************************************************/
+    
+    
+    /*put stream arq-export skip.*/

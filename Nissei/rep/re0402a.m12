@@ -1,0 +1,68 @@
+/*** Desatualiza Fretes ***/
+/*** Elimina Conhecimento de Fretes ***/
+procedure pi-desatualiza-fretes:
+    &IF '{&mguni_version}' < '2.07' &THEN
+        IF param-global.modulo-tf = YES AND CONNECTED('mgscm') THEN
+        DO:
+            if not valid-handle(h-bosc003) or
+               h-bosc003:type      <> "PROCEDURE":U or
+               h-bosc003:file-name <> "scbo/bosc003.p":U then
+               run scbo/bosc003.p persistent set h-bosc003.
+            RUN openQueryStatic IN h-bosc003(INPUT "Default":U).
+        
+            IF b1-natur-oper.tipo-compra = 2 THEN
+            DO:
+                RUN emptyRowErrors IN h-bosc003.
+                RUN deleteConhecRe IN h-bosc003(INPUT docum-est.serie-docto,
+                                                INPUT docum-est.nro-docto,
+                                                INPUT docum-est.cod-emitente,
+                                                INPUT docum-est.nat-operacao,
+                                                INPUT docum-est.cod-estabel).
+                RUN getRowErrors IN h-bosc003 (OUTPUT TABLE RowErrors).
+                IF CAN-FIND(FIRST RowErrors) THEN
+                        FOR EACH RowErrors 
+                           where rowerrors.ErrorType <> "INTERNAL":U NO-LOCK:
+                            CREATE tt-erro.
+                            ASSIGN tt-erro.i-sequen = RowErrors.errorSequence
+                                   tt-erro.cd-erro  = RowErrors.errorNumber
+                                   tt-erro.mensagem = RowErrors.errorDescription
+                                   l-erro = YES.
+                        END.
+                                                
+            END.
+            ELSE  /* Busca na despesa acess½ria */
+            DO:
+                FOR EACH despesa-aces FIELDS(nat-oper-ac ser-docto-ac nro-docto-ac cod-forn-ac)
+                   WHERE despesa-aces.serie-docto  = docum-est.serie-docto
+                     AND despesa-aces.nro-docto    = docum-est.nro-docto
+                     AND despesa-aces.cod-emitente = docum-est.cod-emitente
+                     AND despesa-aces.nat-operacao = docum-est.nat-operacao no-lock,
+                    FIRST bnatur-oper no-lock
+                    WHERE bnatur-oper.nat-operacao = despesa-aces.nat-oper-ac
+                      AND bnatur-oper.tipo-compra  = 2:
+                    RUN emptyRowErrors IN h-bosc003.
+                    RUN deleteConhecRe IN h-bosc003(INPUT despesa-aces.ser-docto-ac,
+                                                    INPUT despesa-aces.nro-docto-ac,
+                                                    INPUT despesa-aces.cod-forn-ac,
+                                                    INPUT despesa-aces.nat-oper-ac,
+                                                    INPUT docum-est.cod-estabel).
+                    RUN getRowErrors IN h-bosc003 (OUTPUT TABLE RowErrors).
+                    IF CAN-FIND(FIRST RowErrors) THEN
+                        FOR EACH RowErrors 
+                           where rowerrors.ErrorType <> "INTERNAL":U NO-LOCK:
+                            CREATE tt-erro.
+                            ASSIGN tt-erro.i-sequen = RowErrors.errorSequence
+                                   tt-erro.cd-erro  = RowErrors.errorNumber
+                                   tt-erro.mensagem = RowErrors.errorDescription
+                                   l-erro = YES.
+                       END.
+                END.
+            END.
+            IF VALID-HANDLE(h-bosc003) THEN
+                RUN destroy IN h-bosc003.
+        
+        END.
+    &ENDIF
+end procedure.
+
+/*** Fim Desatualiza Fretes ***/

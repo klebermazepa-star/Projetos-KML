@@ -1,0 +1,31 @@
+/****************************************************************************
+**
+**  Include.: re0404.i5
+**
+**  Objetivo: ImpressÆo do log de exporta‡Æo e Exporta‡Æo (tt-doc-i-ap)
+**
+****************************************************************************/
+
+{include/i_dbvers.i}
+
+put stream arq-export 
+    "100"  
+    tt-doc-i-ap.ep-codigo                 &IF "{&mguni_version}" >= "2.071" &THEN 
+                                            format "x(5)"                         
+                                          &ELSE                                   
+                                            format "999"                          
+                                          &ENDIF           space (0)        
+    tt-doc-i-ap.referencia                  format "x(10)" space(0) 
+    tt-doc-i-ap.cod-estabel               &IF "{&mguni_version}" >= "2.071" &THEN
+                                            format "x(5)"
+                                          &ELSE
+                                            format "x(3)"  
+                                          &ENDIF           space (0) 
+    day(tt-doc-i-ap.data-movto)             format "99" space(0)
+    month(tt-doc-i-ap.data-movto)           format "99" space(0) 
+    year(tt-doc-i-ap.data-movto)            format "9999" space(0)
+    (tt-doc-i-ap.total-movto * 100)         format "9999999999999" space(0) 
+    tt-doc-i-ap.mo-codigo                   format "99" space(0)  
+    tt-doc-i-ap.ind-sit-lote-implantacao-ap format "99" space(0) 
+    tt-doc-i-ap.cod-versao-integ            format "999"  space(0)             
+    tt-doc-i-ap.ind-elimina-lote            format "99" space(0) skip.

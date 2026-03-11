@@ -1,0 +1,37 @@
+/****************************************************************************
+**
+**  Include.: re0404.i4
+**
+**  Objetivo: ImpressÆo do log de exporta‡Æo e Exporta‡Æo (tt-lin-conta-ap)
+**
+****************************************************************************/
+{include/i_dbvers.i}
+
+put stream arq-export 
+   "300"
+   tt-lin-conta-ap.ep-codigo              &IF "{&mguni_version}" >= "2.071" &THEN 
+                                             format "x(5)"                         
+                                          &ELSE                                   
+                                             format "999"                          
+                                          &ENDIF           space (0)       
+   tt-lin-conta-ap.cod-estabel            &IF "{&mguni_version}" >= "2.071" &THEN
+                                             format "x(5)"
+                                          &ELSE
+                                             format "x(3)"  
+                                          &ENDIF           space (0)     
+   tt-lin-conta-ap.cod-esp                   format "x(2)"  space(0)        
+   tt-lin-conta-ap.serie                     format "x(5)"  space(0)      
+   tt-lin-conta-ap.nr-docto                  format "x(16)" space(0)       
+   tt-lin-conta-ap.parcela                   format "x(2)"  space(0)        
+   "      "                                  format "x(6)"  space(0) 
+   (tt-lin-conta-ap.vl-movto * 100)          format "9999999999999"  space(0)           
+   tt-lin-conta-ap.ct-codigo                 format "x(20)"          space(0)        
+   tt-lin-conta-ap.sc-codigo                 format "x(20)"          space(0) 
+   (tt-lin-conta-ap.vl-movto-presente * 100) format "9999999999999"  space(0) 
+   (tt-lin-conta-ap.vl-movto-cmi  * 100)     format "9999999999999"  space(0) 
+   (tt-lin-conta-ap.vl-movto-fasb  * 100)    format "9999999999999"  space(0) 
+   tt-lin-conta-ap.cod-controle              format "x(15)"          space(0) 
+   (tt-lin-conta-ap.vl-movto-me  * 100)      format "9999999999999"  space(0) 
+   tt-lin-conta-ap.cod-fornec                format "999999999"      space(0) skip.     
+   
+

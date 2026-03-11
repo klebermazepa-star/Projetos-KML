@@ -1,0 +1,189 @@
+/*
+** Integra‡Æo M¢dulo Importa‡Æo
+*/
+{cdp/cd4300.i4 "yes" docum-est.char-1}
+{rep/re1001a.i51 "yes"}
+
+create tt-epc.
+assign tt-epc.cod-event     = "Atualiza-Embarque"
+       tt-epc.cod-parameter = "Nro-Docto"
+       tt-epc.val-parameter = docum-est.nro-docto.
+
+{include/i-epc201.i "Atualiza-Embarque"}
+
+find first tt-epc
+     where tt-epc.cod-event     = "Atualiza-Embarque"
+       and tt-epc.cod-parameter = "Embarque" NO-ERROR.
+if avail tt-epc then
+    assign c-embarque = tt-epc.val-parameter.
+
+/*--------- FINAL UPC ---------*/
+if avail dupli-apagar{1} then
+    assign i-cod-emitente-upc = dupli-apagar{1}.cod-emitente{2}.
+
+if  "{1}" = " " then do:
+
+    if  c-nom-prog-upc-mg97  <> "" THEN DO:
+    
+        for each tt-epc:
+            delete tt-epc.
+        end.
+
+        create tt-epc.
+        assign tt-epc.cod-event = "before_update_duplic"
+               tt-epc.cod-parameter = "ROWID(docum-est)"
+               tt-epc.val-parameter = STRING(ROWID(docum-est)).
+               
+        create tt-epc.
+        assign tt-epc.cod-event = "before_update_duplic"
+               tt-epc.cod-parameter = "i-cod-emitente-upc"
+               tt-epc.val-parameter = STRING(i-cod-emitente-upc).
+               
+         {include/i-epc201.i "before_update_duplic"} 
+
+        find tt-epc
+             where tt-epc.cod-parameter = "i-cod-emitente-upc" no-error.
+        if  avail tt-epc then
+            assign i-cod-emitente-upc = int(tt-epc.val-parameter).             
+        
+    end.                                                   
+end.
+
+for each dupli-apagar{1} {cdp/cd8900.i dupli-apagar{1} docum-est} no-lock:
+
+    if  not l-rec-brasil
+    and not docum-est.nff then do:
+        &IF '{&BF_MAT_VERSAO_EMS}' >= '2.062' &THEN
+          run pi-cria-temp-table (dupli-apagar{1}.nro-docto,
+                                  dupli-apagar{1}.serie-docto,
+                                  dupli-apagar{1}.cod-emitente,
+                                  dupli-apagar{1}.cod-esp,
+                                  dupli-apagar{1}.parcela,
+                                  dupli-apagar{1}.dt-emissao,
+                                  yes /* Elimina IR e ISS */ ).
+        
+        if not l-integracao-ems50 then do:
+        &ENDIF
+        
+           /* Cancelamento Previsao - Internacional */
+           run rep/re0402d1.p ( rowid(dupli-apagar{1}),
+                                output table tt-tit-ap,
+                                output table tt-retorno-erro ).
+
+           run pi-verifica-erro ( output l-erro ).
+
+           if  l-erro then return.
+        
+        &IF '{&BF_MAT_VERSAO_EMS}' >= '2.062' &THEN
+        end.
+        &ENDIF
+    end.
+    else do:
+        /*
+        ** Quando Importa‡Æo com exce‡Æo de notas de rateio, envia n£mero do embarque
+        */
+        if not l-imp or l-imp-rateio or (i-pais-impto-usuario <> 1 and l-imp) then
+            assign c-nr-duplic = dupli-apagar{1}.nr-duplic.
+        else do:
+            /*--------- INICIO UPC-PPG ---------*/ 
+            
+            for each tt-epc where tt-epc.cod-event = "Busca-Nr-Invoice":
+                delete tt-epc.
+            end.
+            
+            create tt-epc.
+            assign tt-epc.cod-event     = "Busca-Nr-Invoice"
+                   tt-epc.cod-parameter = "nr-duplic"
+                   tt-epc.val-parameter = string(dupli-apagar{1}.nr-duplic).
+            
+            {include/i-epc201.i "Busca-Nr-Invoice"}
+            
+            find first tt-epc
+                 where tt-epc.cod-event     = "Busca-Nr-Invoice"
+                   and tt-epc.cod-parameter = "retorno" no-error.
+            if  avail tt-epc then
+                assign c-nr-duplic = tt-epc.val-parameter.
+            else
+                assign c-nr-duplic = c-embarque.
+            
+            /*--------- FINAL UPC ---------*/
+        end.
+        
+        &IF DEFINED (CUSTOM_GRENDENE) &THEN
+            run pi-cria-temp-table ( c-nr-duplic,
+                                     dupli-apagar{1}.serie,
+                                     docum-est.cod-emitente,
+                                     dupli-apagar{1}.cod-esp,
+                                     dupli-apagar{1}.parcela,
+                                     dupli-apagar{1}.dt-emissao,
+                                     yes /* Elimina IR e ISS */ ).
+        &ELSE
+            run pi-cria-temp-table ( c-nr-duplic,
+                                     dupli-apagar{1}.serie,
+                                     IF i-cod-emitente-upc = ? OR i-cod-emitente-upc = 0 THEN dupli-apagar{1}.cod-emitente{2} ELSE i-cod-emitente-upc,
+                                     dupli-apagar{1}.cod-esp,
+                                     dupli-apagar{1}.parcela,
+                                     dupli-apagar{1}.dt-emissao,
+                                     yes /* Elimina IR e ISS */ ).
+        &ENDIF
+
+        if not l-integracao-ems50 then do:
+
+            /*--------- INICIO UPC ---------*/ 
+            for each tt-epc where tt-epc.cod-event = "Atualiza-Dupli":
+               delete tt-epc.
+            end.
+
+            create tt-epc.
+            assign tt-epc.cod-event     = "Atualiza-Dupli"
+                   tt-epc.cod-parameter = "parametros"
+                   tt-epc.val-parameter = string(rowid(docum-est)) + ";" + string(this-procedure).
+
+            {include/i-epc201.i "Atualiza-Dupli"}     
+
+            /*--------- FINAL UPC ---------*/
+
+
+            if can-find(first tt-param) then do:
+            run app/apapi018.p ( input  table tt-param,
+                                 input-output table tt-tit-ap,
+                                 output table tt-retorno-erro ).
+            end.
+
+            run pi-verifica-erro ( output l-erro ).
+
+            if  l-erro then return.
+
+        end.
+
+    end.
+end.
+
+PROCEDURE pi-InputTableTTParam:
+
+    DEF INPUT PARAM TABLE FOR tt-param.
+
+END PROCEDURE.
+
+PROCEDURE pi-OutputTableTTParam:
+
+    DEF OUTPUT PARAM TABLE FOR tt-param.
+
+END PROCEDURE.
+
+PROCEDURE pi-erro-nota-aux:
+
+   def input param i-erro      as integer  no-undo.
+   def input param c-complem   as char     no-undo.
+   def input param pi-erro     as logical  no-undo.
+
+   run utp/ut-msgs.p ( input "msg", input i-erro, input c-complem ).
+
+   create tt-erro.
+   assign tt-erro.cd-erro  = i-erro
+          tt-erro.mensagem = return-value.
+
+   if  pi-erro then 
+       assign l-erro = yes.   
+
+END PROCEDURE.

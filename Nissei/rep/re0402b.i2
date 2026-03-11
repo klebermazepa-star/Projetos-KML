@@ -1,0 +1,94 @@
+/************************************************************************
+**
+**      RE0402b.i2 - Procedures comuns ao re0402 e im9005.
+**
+************************************************************************/
+
+procedure pi-verifica-ap:
+
+    def input  param pi-cod-emitente like dupli-apagar.cod-emitente no-undo.
+    def input  param pi-cod-esp      like dupli-apagar.cod-esp      no-undo.
+    def input  param pi-nr-duplic    like dupli-apagar.nr-duplic    no-undo.
+    def input  param pi-parcela      like dupli-apagar.parcela      no-undo.
+
+    assign i-empresa = param-global.empresa-prin.
+      
+    &if defined (bf_dis_consiste_conta) &then
+      
+        find estabelec where
+             estabelec.cod-estabel = docum-est.cod-estabel no-lock no-error.
+      
+        run cdp/cd9970.p (input rowid(estabelec),
+                          output i-empresa).
+    &endif
+
+    find lin-i-ap
+        where lin-i-ap.ep-codigo   = i-empresa
+        and   lin-i-ap.cod-estabel = docum-est.cod-estabel
+        and   lin-i-ap.cod-fornec  = pi-cod-emitente 
+        and   lin-i-ap.serie       = docum-est.serie-docto
+        and   lin-i-ap.cod-esp     = pi-cod-esp
+        and   lin-i-ap.nr-docto    = pi-nr-duplic
+        and   lin-i-ap.parcela     = pi-parcela exclusive-lock no-error.
+
+    if  avail lin-i-ap then do:
+        find doc-i-ap
+            where doc-i-ap.ep-codigo  = lin-i-ap.ep-codigo
+            and   doc-i-ap.referencia = lin-i-ap.referencia
+            no-lock no-error.
+        if  not avail doc-i-ap then
+            delete lin-i-ap.
+        else
+            assign l-existe-ap = yes.
+    end.
+    
+    find tit-ap use-index codigo
+        where tit-ap.ep-codigo   = i-empresa
+        and   tit-ap.cod-estabel = docum-est.cod-estabel
+        and   tit-ap.cod-fornec  = pi-cod-emitente
+        and   tit-ap.serie       = docum-est.serie-docto
+        and   tit-ap.cod-esp     = pi-cod-esp
+        and   tit-ap.nr-docto    = pi-nr-duplic
+        and   tit-ap.parcela     = pi-parcela   no-lock no-error.
+    if  avail tit-ap then do:
+        assign l-existe-ap = yes.
+        find first mov-ap of tit-ap
+            where mov-ap.contabilizou no-lock no-error.
+        if  avail mov-ap then 
+            assign l-dp-cont = yes.
+    end.
+end.    
+
+Procedure Pi-verifica-EMS50:
+    def input        param  c-cod-estabel   like docum-est.cod-estabel.
+    def input        param  c-cod-forn-ac   like despesa-aces.cod-forn-ac.
+    def input        param  c-cod-esp       like despesa-aces.cod-esp.
+    def input        param  c-ser-docto-ac  like despesa-aces.ser-docto-ac.
+    def input        param  c-nro-docto-ac  like despesa-aces.nro-docto-ac.
+    def input        param  c-parcela       like dupli-apagar.parcela.
+    def output       param  l-existe         as logical no-undo.
+    def output       param  l-erro-ems50     as logical no-undo.
+    
+
+
+    assign l-erro-ems50 = no
+           l-existe     = yes.
+
+    run prgint/dcf/dcf900za.py (input 001,
+                                input "1", /* Foresight "APB",*/
+                                input string(c-cod-estabel) + "," +  
+                                      string(c-cod-forn-ac)  + "," + 
+                                      string(c-cod-esp)      + "," +
+                                      string(c-ser-docto-ac) + "," +
+                                      string(c-nro-docto-ac) + "," +
+                                      string(c-parcela) ,        
+                                input no,
+                                output l-existe,
+                                output c-parcela,
+                                input-output table tt-erro,
+                                output l-erro-ems50).
+
+End Procedure.
+
+
+/* re0402b.i2 */

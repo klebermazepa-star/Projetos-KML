@@ -1,0 +1,96 @@
+/****************************************************************************
+**
+**  Include.: re0404.i1
+**
+**  Objetivo: Define temp-tables, frames e variveis comuns
+**
+****************************************************************************/
+
+{cdp/cdcfgmat.i}/*** Pr‚-processors definitions ***/ 
+
+define temp-table tt-param
+    field destino    as integer
+    field arquivo    as char
+    field usuario    as char format "x(12)"
+    field data-exec  as date
+    field hora-exec  as integer
+    field da-data-i  as date format "99/99/9999"
+    field da-data-f  as date format "99/99/9999"
+&if defined(bf_mat_selecao_estab_re) &then    
+    field c-est-ini like estabelec.cod-estabel
+    field c-est-fim like estabelec.cod-estabel
+&endif
+    field i-opcao    as integer
+    field c-opcao    as char format "x(20)"
+    field c-destino  as char format "x(40)"
+    field l-imp-param as log.
+
+define temp-table tt-digita
+    field flag       as logical format "*/"
+    field Data       as char    format "x(5)"
+    field Hora       as char    format "x(5)"
+    field Arquivo    as char    format "x(30)"
+    field ep-codigo  like lin-i-ap.ep-codigo
+    field estab-i    like lin-i-ap.cod-estabel
+    field estab-f    like lin-i-ap.cod-estabel
+    field cod-esp    like doc-i-ap.cod-esp
+    field referencia like doc-i-ap.referencia
+    index id-digita is primary data.
+
+def temp-table tt-raw-digita
+    field raw-digita as raw.
+
+def var de-total-movto   like doc-i-ap.total-movto no-undo.
+def var h-acomp          as handle  no-undo.
+
+/* Variaveis para traducao */
+def var c-lb-msg   as char no-undo.
+def var c-lb-total as char no-undo.
+def var c-lb-trans as char no-undo.
+def var c-lb-sel   as char no-undo.
+def var c-lb-dig   as char no-undo.
+def var c-lb-imp   as char no-undo.
+def var c-lb-ini   as char no-undo.
+def var c-lb-fim   as char no-undo.
+def var c-lb-des   as char no-undo.
+def var c-lb-usu   as char no-undo.
+def var c-lb-estab as char no-undo.
+
+{cdp/cd0501.i1} /* Define frames comuns aos programas AP0501 e CE0602 */
+
+form space(14)
+     lin-i-ap.ep-codigo
+     lin-i-ap.cod-estabel
+     lin-i-ap.cod-esp
+     lin-i-ap.cod-fornec
+     emitente.nome-abrev
+     lin-i-ap.nr-docto
+     lin-i-ap.serie
+     lin-i-ap.parcela
+     lin-i-ap.dt-emissao
+     lin-i-ap.dt-transacao
+     lin-i-ap.dt-vencimen
+     lin-i-ap.vl-original
+     with stream-io no-box 64 down width 132 centered frame f-corpo2.
+/* Inicio -- Projeto Internacional -- ut-trfrrp.p adicionado */
+RUN utp/ut-trfrrp.p (INPUT FRAME f-corpo2:HANDLE).
+
+
+{utp/ut-liter.i SELE€ÇO * r}
+assign c-lb-sel = trim(return-value).
+{utp/ut-liter.i DIGITA€ÇO * r}
+assign c-lb-dig = trim(return-value).
+{utp/ut-liter.i IMPRESSÇO * r}
+assign c-lb-imp = trim(return-value).
+{utp/ut-liter.i Inicial * r}
+assign c-lb-ini = trim(return-value).
+{utp/ut-liter.i Final * r}
+assign c-lb-fim = trim(return-value).
+{utp/ut-liter.i Destino * r}
+assign c-lb-des = trim(return-value).
+{utp/ut-liter.i Usu rio * r}
+assign c-lb-usu = trim(return-value).
+{utp/ut-liter.i Data_Transa‡Æo * r}
+assign c-lb-trans = trim(return-value).
+
+/* Fim Include */

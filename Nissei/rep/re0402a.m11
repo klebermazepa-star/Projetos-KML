@@ -1,0 +1,43 @@
+
+procedure pi-desatualiza-draw:
+        if  l-desatualiza-draw
+        and (not can-find(funcao where funcao.cd-funcao = "spp-drb-sld-terc":U and funcao.ativo))
+        and item-doc-est.nr-ato-concessorio <> "" 
+        and param-global.modulo-07
+        and param-global.modulo-ex
+        &if "{&bf_dis_versao_ems}":U >= "2.06":U &then                                             
+            and b1-natur-oper.log-natur-operac-draw                                                       
+        &else                                                                                      
+            and substring(b1-natur-oper.char-1,94,1) = "1"                                                
+        &endif
+        and emitente.natureza > 2
+        and emitente.pais <> estabelec.pais
+        and connected ("mgcex":U) then do:
+
+            if  not valid-handle (h-bocx332) then
+                run cxbo/bocx332.p persistent set h-bocx332.
+            run eliminaMovtos in h-bocx332 (input  rowid(item-doc-est),
+                                            input  yes,  /** Elimina Movtos**/
+                                            input  yes,  /** Desatualizacao Documentos **/
+                                            output table RowErrors).
+            if  can-find (first RowErrors) then do:
+                find last tt-erro no-error.
+                if  avail tt-erro then
+                    assign i-seq-erro = tt-erro.i-sequen + 1.
+                else 
+                    assign i-seq-erro = 1.
+                for each RowErrors:
+                    create tt-erro.
+                    assign tt-erro.i-sequen = i-seq-erro
+                           tt-erro.cd-erro  = RowErrors.errorNumber
+                           tt-erro.mensagem = RowErrors.errorDescription.
+                end.
+                assign l-erro = yes.
+            end.
+
+            if  valid-handle (h-bocx332) then do:
+                delete procedure h-bocx332.
+                assign h-bocx332 = ?.
+            end.
+        end.
+end procedure.        
