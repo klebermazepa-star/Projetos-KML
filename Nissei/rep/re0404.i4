@@ -2,7 +2,7 @@
 **
 **  Include.: re0404.i4
 **
-**  Objetivo: ImpressÆo do log de exporta‡Æo e Exporta‡Æo (tt-lin-conta-ap)
+**  Objetivo: Impressï¿½o do log de exportaï¿½ï¿½o e Exportaï¿½ï¿½o (tt-lin-conta-ap)
 **
 ****************************************************************************/
 {include/i_dbvers.i}
@@ -33,5 +33,12 @@ put stream arq-export
    tt-lin-conta-ap.cod-controle              format "x(15)"          space(0) 
    (tt-lin-conta-ap.vl-movto-me  * 100)      format "9999999999999"  space(0) 
    tt-lin-conta-ap.cod-fornec                format "999999999"      space(0) skip.     
+
+
+   /*
+
+   teste de codigo do projeto 5
+
+   */
    
 

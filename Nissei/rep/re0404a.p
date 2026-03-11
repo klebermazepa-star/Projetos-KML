@@ -18,19 +18,26 @@
 **
 **       DATA....: JUNHO DE 1997
 **
-**       OBJETVO.: INTEGRA€ÇO COM CONTAS A PAGAR
+**       OBJETVO.: INTEGRAï¿½ï¿½O COM CONTAS A PAGAR
 **
-**       VERSÇO..: 1.00.000 - Sandra Stadelhofer
+**       VERSï¿½O..: 1.00.000 - Sandra Stadelhofer
 **
 ****************************************************************************/
 
 {utp/ut-glob.i}
-{cdp/cd0666.i} /**** Defini‡Æo da temp-table tt-erro ****/
+{cdp/cd0666.i} /**** Definiï¿½ï¿½o da temp-table tt-erro ****/
 {rep/re0404.i1} /* Define temp-tables, frames e varivaeis e preprocessadores comuns */
 {cdp/cd4300.i3}
 
-{app/apapi001b.i} /*Defini‡Æo de tem-tables */
+{app/apapi001b.i} /*Definiï¿½ï¿½o de tem-tables */
 {cdp/cd0031.i "MRE"} /*Seguranca por Estabelecimento*/
+
+ /*
+
+   teste de codigo do projeto 5
+
+   */
+   
 
 def input param raw-param as raw no-undo.
 def input param table for tt-raw-digita.
@@ -104,17 +111,17 @@ RUN utp/ut-trfrrp.p (INPUT FRAME f-erro:HANDLE).
 
 {include/i-epc200.i re0404a} /** Upc **/
 
-{utp/ut-liter.i Sequˆncia * r}
+{utp/ut-liter.i Sequï¿½ncia * r}
 assign tt-erro.i-sequen:label in frame f-erro = return-value.
 
-{utp/ut-liter.i C¢digo * r}
+{utp/ut-liter.i Cï¿½digo * r}
 assign tt-erro.cd-erro:label in frame f-erro = return-value.
 
 {utp/ut-liter.i Mensagem * r}
 assign tt-editor.conteudo:label in frame f-erro = return-value.
 
 run utp/ut-acomp.p persistent set h-acomp.
-{utp/ut-liter.i Integra‡Æo_com_Contas_a_Pagar *}
+{utp/ut-liter.i Integraï¿½ï¿½o_com_Contas_a_Pagar *}
 
 run pi-inicializar in h-acomp (input  Return-value ).
 
@@ -174,7 +181,7 @@ find first param-estoq  no-lock no-error.
 assign c-RE0301-origem = "RE0404".
 
 /**********************************************************************
-**      EMS - 5.0 Integra‡Æo "On-line" Datasul-EMS 2.0
+**      EMS - 5.0 Integraï¿½ï¿½o "On-line" Datasul-EMS 2.0
 **********************************************************************/
 
 if  l-ems50 then do:
@@ -238,7 +245,7 @@ do  on endkey undo, return
         END.
 
        /***********************************************************************
-        * Consistˆncia para somente chamar o re9340 para os documentos que o  *
+        * Consistï¿½ncia para somente chamar o re9340 para os documentos que o  *
         * estabelecimento estiver dentro de alguma faixa do tt-digita         *
         **********************************************************************/
        if param-estoq.gera-ap = 2 then do:
@@ -303,10 +310,10 @@ do  on endkey undo, return
           if  natur-oper.tipo = 2          /* SAIDA                                */
           and i-pais-impto-usuario <> 1    /* Somente Internacional                */
           and param-global.modulo-ap       /* AP implantado                        */
-          and docum-est.esp-docto = 20     /* Devolu‡Æo a fornecedor               */
+          and docum-est.esp-docto = 20     /* Devoluï¿½ï¿½o a fornecedor               */
           then do:  
 
-            &IF "{&bf_dis_versao_ems}" = "2.042" &THEN /* Documento gera nota de cr‚dito no AP */
+            &IF "{&bf_dis_versao_ems}" = "2.042" &THEN /* Documento gera nota de crï¿½dito no AP */
              if not can-find(first item-doc-est of docum-est 
                              where item-doc-est.log-geracao-nrc-ap) then next.
             &ELSEIF "{&bf_dis_versao_ems}" >= "2.05" &THEN /* Nesta release, nome do campo foi corrigido.*/
@@ -326,7 +333,7 @@ do  on endkey undo, return
                                 INPUT-OUTPUT de-val-tot,
                                 input-output table tt-erro ).
 
-          END. /*** Termino atualiza‡Æo Nota Cr‚dito ***/
+          END. /*** Termino atualizaï¿½ï¿½o Nota Crï¿½dito ***/
         END.
         
         IF  param-estoq.gera-ap = 1 THEN
@@ -588,8 +595,8 @@ Procedure pi-exporta-doc-i-ap:
 
     create tt-doc-i-ap.
     assign tt-doc-i-ap.cod-esp    = if param-global.modulo-ap = no 
-                                    then "CT" /* Atualiza‡Æo via Multiplanta             */ 
-                                              /* Indica contabiliza‡Æo na planta destino */
+                                    then "CT" /* Atualizaï¿½ï¿½o via Multiplanta             */ 
+                                              /* Indica contabilizaï¿½ï¿½o na planta destino */
                                     else "" 
           tt-doc-i-ap.cod-estabel = tt-lin-i-ap.cod-estabel
           tt-doc-i-ap.data-movto  = tt-lin-i-ap.dt-transacao
@@ -598,7 +605,7 @@ Procedure pi-exporta-doc-i-ap:
           tt-doc-i-ap.total-movto = de-total-movto
           tt-doc-i-ap.cod-versao-integ = 002
           tt-doc-i-ap.ind-elimina-lote = if avail param-re and 
-                                                  param-re.erro-dupli then 2 /* nÆo elimina o tt-doc-i-ap em caso de erro na api*/
+                                                  param-re.erro-dupli then 2 /* nï¿½o elimina o tt-doc-i-ap em caso de erro na api*/
                                                                        else 1. /* elimina o tt-doc-i-ap em caso de erro na api*/
     {rep/re0404.i5}
 
@@ -621,10 +628,10 @@ procedure pi-conecta-ems5:
                h-btb009za:TYPE = "PROCEDURE":U AND
                h-btb009za:FILE-NAME = "btb/btb009za.p":U then do:
 
-               run pi-conecta-bco IN h-btb009za (Input 1,                         /*contem a versÒo de integraîÒo da Api*/
-                                                 Input i-conect,                  /*contem a opîÒo desejada (1-ConexÒo, 2-DesconexÒo)*/
-                                                 Input param-global.empresa-prin, /*contem o c®digo da empresa*/
-                                                 Input "all",                     /*contem o c®digo do banco externo*/ 
+               run pi-conecta-bco IN h-btb009za (Input 1,                         /*contem a versï¿½o de integraï¿½ï¿½o da Api*/
+                                                 Input i-conect,                  /*contem a opï¿½ï¿½o desejada (1-Conexï¿½o, 2-Desconexï¿½o)*/
+                                                 Input param-global.empresa-prin, /*contem o cï¿½digo da empresa*/
+                                                 Input "all",                     /*contem o cï¿½digo do banco externo*/ 
                                                  Output Table tt_erros_conexao).  /*retorna erros caso existam*/
             end.
         end.
@@ -641,10 +648,10 @@ procedure pi-conecta-ems5:
                    h-btb009za:TYPE = "PROCEDURE":U AND
                    h-btb009za:FILE-NAME = "btb/btb009za.p":U then do:
 
-                   run pi-conecta-bco IN h-btb009za (Input 2,                         /*contem a versÒo de integraîÒo da Api*/
-                                                     Input i-conect,                  /*contem a opîÒo desejada (1-ConexÒo, 2-DesconexÒo)*/
-                                                     Input param-global.empresa-prin, /*contem o c®digo da empresa*/
-                                                     Input "all",                     /*contem o c®digo do banco externo*/ 
+                   run pi-conecta-bco IN h-btb009za (Input 2,                         /*contem a versï¿½o de integraï¿½ï¿½o da Api*/
+                                                     Input i-conect,                  /*contem a opï¿½ï¿½o desejada (1-Conexï¿½o, 2-Desconexï¿½o)*/
+                                                     Input param-global.empresa-prin, /*contem o cï¿½digo da empresa*/
+                                                     Input "all",                     /*contem o cï¿½digo do banco externo*/ 
                                                      Output Table tt_erros_conexao).  /*retorna erros caso existam*/
                 end.
             end.    
